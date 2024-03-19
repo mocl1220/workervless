@@ -215,25 +215,6 @@ speedqueue=$((ips + speedqueue_max)) #自定义测速队列，多测2条做冗�
 #./CloudflareST -tp 443 -url "https://cs.cmliussss.link" -f "ip/HK.txt" -dn 128 -tl 260 -p 0 -o "log/HK.csv"
 ./CloudflareST -tp $port -url $speedurl -f $ip_txt -dn $speedqueue -tl 280 -tlr $lossmax -p 0 -sl $speedlower -o $result_csv
 
-###########################以下为自己diy内容##################################
-echo "清空temp.txt"
-rm temp.txt
-rm ~/workervless/yxip.txt
-echo "重新生成yxip"
-cat $result_csv | cut -d ',' -f 1 | sed '1d' >> temp.txt
-while read -r line; do
-        ip=$(echo $line)
-        result_area=$(mmdblookup --file /usr/share/GeoIP/GeoLite2-Country.mmdb --ip $ip country names zh-CN | sed "/./{s/\"//g;s/<utf8_string>//g}")
-        echo $ip:$port#$result_area > ~/workervless/yxip.txt
-done < temp.txt
-echo "优选结果如下：-------------------"
-cat ~/workervless/yxip.txt
-echo "开始推送"
-cd ~/workervless/
-git add yxip.txt
-git commit -m '自动生成ip'
-git push
-##############################################################################
 if [ "$record_count" -gt 0 ]; then
   for record_id in "${record_identifiers[@]}"; do
 
@@ -314,3 +295,21 @@ do
     fi
 
 done
+
+###########################以下为自己diy内容##################################
+echo "重新生成yxip"
+cat $result_csv | cut -d ',' -f 1 | sed '1d' > temp.txt
+while read -r line; do
+        ip=$(echo $line)
+        result_area=$(mmdblookup --file /usr/share/GeoIP/GeoLite2-Country.mmdb --ip $ip country names zh-CN | sed "/./{s/\"//g;s/<utf8_string>//g}")
+        echo $ip:$port#$result_area > ~/workervless/yxip.txt
+done < temp.txt
+echo "优选结果如下：-------------------"
+cat ~/workervless/yxip.txt
+echo "开始推送"
+cd ~/workervless/
+git add yxip.txt
+git commit -m '自动生成ip'
+git push
+##############################################################################
+
